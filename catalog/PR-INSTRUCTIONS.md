@@ -23,7 +23,7 @@ data/plugins/<owner>__<repo>.yml
 data/plugins/someone__dsh-voice-enhance.yml
 ```
 
-内容用 `catalog/data-plugins.yml`（把里面的 `YOUR-NAME` 换成你的用户名）：
+内容用 `catalog/data-plugins.yml`（把里面的 `Chrono-rigger` 换成你的用户名）：
 
 ```yaml
 url: https://github.com/someone/dsh-voice-enhance
