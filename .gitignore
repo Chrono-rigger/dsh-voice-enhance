@@ -1,0 +1,12 @@
+# build inputs, not shipped code
+build/
+
+# the assembled artifacts are committed; their inputs live in build/
+!build/head.js
+!build/tail.js
+
+node_modules/
+*.tgz
+.selftest.*
+__probe.js
+lib/__probe.js

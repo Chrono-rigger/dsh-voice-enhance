@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "title": "语音输入与提示词增强",
+    "description": "按住 Alt 说话、松开自动把转写文字修正后插入输入框；输入框左侧的 ✨ 按钮会把当前草稿改写成更清晰、更容易被理解的提示词。"
+  },
+  "enhance": {
+    "title": "增强提示词",
+    "empty": "输入框是空的，先写点什么再点增强",
+    "busy": "正在增强提示词…",
+    "done": "提示词已增强",
+    "failed": "增强失败：{message}"
+  },
+  "voice": {
+    "title": "按住 Alt 说话，松开结束",
+    "requesting": "正在打开麦克风…",
+    "recording": "正在聆听…松开 Alt 结束",
+    "transcribing": "正在转写…",
+    "correcting": "正在修正错别字…",
+    "inserted": "已插入 {seconds} 秒语音",
+    "empty": "没有听清，请再说一次",
+    "tooLarge": "录音太长了，请说得短一些",
+    "conflict": "输入框正在提交，文字已保留，点「插入」重试",
+    "retry": "插入",
+    "undo": "还原",
+    "autoSend": "松开后直接发送",
+    "unavailable": "这个环境不支持录音",
+    "permission": "麦克风权限被拒绝",
+    "deviceMissing": "找不到可用的麦克风",
+    "interrupted": "录音被中断",
+    "cancelled": "已取消",
+    "noSpeech": "语音服务不可用，请在插件页启用「语音输入」",
+    "notReady": "语音模型还没准备好，请在插件页下载模型",
+    "failed": "语音输入失败：{message}"
+  }
+}

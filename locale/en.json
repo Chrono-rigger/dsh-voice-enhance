@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "title": "Voice Input & Prompt Enhance",
+    "description": "Hold Alt to dictate and release to insert the cleaned-up transcript; the ✨ button at the left of the composer rewrites the current draft into a clearer prompt."
+  },
+  "enhance": {
+    "title": "Enhance prompt",
+    "empty": "The composer is empty — write something first",
+    "busy": "Enhancing the prompt…",
+    "done": "Prompt enhanced",
+    "failed": "Enhance failed: {message}"
+  },
+  "voice": {
+    "title": "Hold Alt to talk, release to finish",
+    "requesting": "Opening the microphone…",
+    "recording": "Listening… release Alt to finish",
+    "transcribing": "Transcribing…",
+    "correcting": "Fixing dictation errors…",
+    "inserted": "Inserted {seconds}s of speech",
+    "empty": "Nothing was recognized, please try again",
+    "tooLarge": "That recording was too long, please keep it shorter",
+    "conflict": "The composer is busy; your text is kept — press Insert to retry",
+    "retry": "Insert",
+    "undo": "Undo",
+    "autoSend": "Send on release",
+    "unavailable": "This environment cannot record audio",
+    "permission": "Microphone permission was denied",
+    "deviceMissing": "No usable microphone was found",
+    "interrupted": "The recording was interrupted",
+    "cancelled": "Cancelled",
+    "noSpeech": "The speech service is unavailable — enable the Voice Input plugin",
+    "notReady": "The speech model is not ready — download it in the Plugins page",
+    "failed": "Voice input failed: {message}"
+  }
+}
