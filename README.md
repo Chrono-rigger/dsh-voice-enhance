@@ -8,7 +8,9 @@ Voice dictation and prompt enhancement for [DeepSeek Harness](https://github.com
 
 **Hold Alt to dictate.** Press and hold `Alt`, speak, release. The recording is transcribed on the Host and then cleaned up — typos, homophones, missing characters, punctuation and sentence breaks — and the result is inserted at the cursor. The cleanup is deliberately minimal: it never rewrites, expands, summarises or asks a question, and anything uncertain is left exactly as it came out. A dictated sentence that happens to *sound* like an instruction is treated as text to be copied, not as a request to follow.
 
-**✨ Enhance prompt.** The sparkle button at the left of the composer, immediately before the model selector, rewrites the current draft into a clearer, more specific prompt using the same default model. The result replaces the draft, with an Undo control to get the original back.
+**✨ Enhance prompt.** The sparkle button at the left of the composer, immediately before the model selector, rewrites the current draft into a brief an assistant can act on without asking follow-up questions: it supplies the background and goal, splits the request into separately checkable task points, states acceptance per point, and fixes the scope, constraints and deliverable format. The result replaces the draft, with an Undo control to get the original back.
+
+**Restore draft.** The "Restore draft" button on the status pill (or `Ctrl+Alt+Z`) puts the previous draft back in the composer. It does not depend on the pill still being on screen: the draft history is kept per Session in browser storage, survives a reload and holds up to 12 drafts. A restore is itself undoable, so the text currently in the box is never lost.
 
 A status pill appears below the composer card while either control is working: elapsed seconds, a "send on release" switch, an Insert button when a transcript could not be placed, and an Undo button after an enhancement.
 
@@ -19,6 +21,7 @@ A status pill appears below the composer card while either control is working: e
 | `Alt` + any other key | Treated as a shortcut (`Alt+Tab`, IME chords); the capture is discarded |
 | `Esc` while recording | Cancel |
 | ✨ button | Enhance the draft |
+| `Ctrl+Alt+Z` | Restore the previous draft |
 
 ## Requirements
 
