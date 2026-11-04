@@ -6,7 +6,7 @@ Voice dictation and prompt enhancement for [DeepSeek Harness](https://github.com
 
 ## What it does
 
-**Hold Alt to dictate.** Press and hold `Alt`, speak, release. The recording is transcribed on the Host, then passed through the Host model to fix the mistakes speech recognition usually makes — homophones, wrong characters, missing punctuation — and the result is inserted at the cursor.
+**Hold Alt to dictate.** Press and hold `Alt`, speak, release. The recording is transcribed on the Host and then cleaned up — typos, homophones, missing characters, punctuation and sentence breaks — and the result is inserted at the cursor. The cleanup is deliberately minimal: it never rewrites, expands, summarises or asks a question, and anything uncertain is left exactly as it came out. A dictated sentence that happens to *sound* like an instruction is treated as text to be copied, not as a request to follow.
 
 **✨ Enhance prompt.** The sparkle button at the left of the composer, immediately before the model selector, rewrites the current draft into a clearer, more specific prompt using the same default model. The result replaces the draft, with an Undo control to get the original back.
 
@@ -29,7 +29,7 @@ A status pill appears below the composer card while either control is working: e
 ## Install
 
 ```sh
-dsh plugin --profile <profile> add github:owner/dsh-voice-enhance
+dsh plugin --profile <profile> add github:Chrono-rigger/dsh-voice-enhance
 ```
 
 Or from the Web UI: **Settings → Plugins**, then install the bundle by package name or from a local directory.
@@ -39,6 +39,7 @@ Or from the Web UI: **Settings → Plugins**, then install the bundle by package
 - Nothing is persisted except one browser-local preference: the "send on release" switch (`localStorage` key `dsh-voice-enhance.autoSend`). Recordings are discarded after transcription; no audio is written to disk.
 - The audio pipeline is bounded end to end: microphone permission, recorder flush, decoding, resampling and transcription each have a timeout, so a wedged browser API surfaces as an error message rather than an endless "transcribing" state.
 - Two Remote calls cross the wire, both of them one-shot text rewrites: `promptTools/refine` with `mode: "correct"` for a transcript, `mode: "enhance"` for a draft.
+- The cleanup is checked in code, not only asked for in the prompt: an answer that replies to the text, asks a question, expands or shortens it is rejected, one terser retry is made, and failing that the transcript is inserted unchanged. A transcript with a typo still says what was said; a rewritten one does not.
 - The custom element styles use the host theme tokens (`--dsw-alias-*`), so light and dark themes need no separate artwork.
 
 ## Licence
