@@ -10,7 +10,7 @@ Voice dictation and prompt enhancement for [DeepSeek Harness](https://github.com
 
 **✨ Enhance prompt.** The sparkle button at the left of the composer, immediately before the model selector, rewrites the current draft into a brief an assistant can act on without asking follow-up questions: it supplies the background and goal, splits the request into separately checkable task points, states acceptance per point, and fixes the scope, constraints and deliverable format. The result replaces the draft, with an Undo control to get the original back.
 
-**Restore draft.** The "Restore draft" button on the status pill (or `Ctrl+Alt+Z`) puts the previous draft back in the composer. It does not depend on the pill still being on screen: the draft history is kept per Session in browser storage, survives a reload and holds up to 12 drafts. A restore is itself undoable, so the text currently in the box is never lost.
+**Restore draft.** Enhancing replaces the whole draft, so only enhancement records draft history; dictation just fixes homophones and punctuation without rewriting what you said, so it never enters the history. Restore either with the "Restore draft" button on the status pill, or by pressing `R` while the focus is **not** in a text field (inside the composer, R keeps typing the letter). The history is kept per Session in browser storage, survives a reload and holds up to 12 drafts; a restore is itself undoable, so the text currently in the box is never lost. The pill also keeps the restore affordance visible once a draft is stored — dictating again will not hide it.
 
 A status pill appears below the composer card while either control is working: elapsed seconds, a "send on release" switch, an Insert button when a transcript could not be placed, and an Undo button after an enhancement.
 
@@ -21,7 +21,7 @@ A status pill appears below the composer card while either control is working: e
 | `Alt` + any other key | Treated as a shortcut (`Alt+Tab`, IME chords); the capture is discarded |
 | `Esc` while recording | Cancel |
 | ✨ button | Enhance the draft |
-| `Ctrl+Alt+Z` | Restore the previous draft |
+| `R` (when not typing) | Restore the previous draft |
 
 ## Requirements
 
