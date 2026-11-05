@@ -30,8 +30,8 @@ url: https://github.com/someone/dsh-voice-enhance
 name: someone/dsh-voice-enhance
 category: voice
 description:
-  en: Hold Alt to dictate and insert a cleaned-up transcript, plus a sparkle button that rewrites the composer draft into a clearer prompt.
-  zh: 按住 Alt 说话、松开插入修正后的转写文字，输入框旁的星标按钮可把草稿改写成更清晰的提示词。
+  en: Hold Ctrl to dictate and insert a cleaned-up transcript, plus a sparkle button that rewrites the composer draft into a clearer prompt.
+  zh: 按住 Ctrl 说话、松开插入修正后的转写文字，输入框旁的星标按钮可把草稿改写成更清晰的提示词。
 icon: https://raw.githubusercontent.com/someone/dsh-voice-enhance/main/assets/icon.png
 ```
 
@@ -61,10 +61,10 @@ PR 标题建议：`Add dsh-voice-enhance (voice dictation + prompt enhancement)`
 
 评审会拿描述对着代码核。所以别写「46 个工具」这种，除非真有。本条目只说了两件属实的事：
 
-1. 按住 Alt 说话、松开插入修正后的文字
+1. 按住 Ctrl 说话、松开插入修正后的文字
 2. 星标按钮把草稿改写成更清晰的提示词
 
-这两件事代码里都真实存在（`lib/client.js` 的 Alt 手势与 ✨ 按钮，`lib/index.js` 的 `promptTools/refine`）。**不要**为了好看加「支持 100 种语言」「自动发送消息」之类——前者不存在，后者默认是关的。
+这两件事代码里都真实存在（`lib/client.js` 的 Ctrl 手势与 ✨ 按钮，`lib/index.js` 的 `promptTools/refine`）。**不要**为了好看加「支持 100 种语言」「自动发送消息」之类——前者不存在，后者默认是关的。
 
 ## 六、可选但推荐
 

@@ -1,7 +1,7 @@
-# build inputs, not shipped code
-build/
-
-# the assembled artifacts are committed; their inputs live in build/
+# the assembled artifact lib/client.js is committed; its sources are
+# build/head.js + the shim + build/tail.js, which are tracked because a
+# contributor needs them to rebuild
+build/*
 !build/head.js
 !build/tail.js
 

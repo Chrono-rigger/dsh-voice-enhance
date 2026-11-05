@@ -6,7 +6,7 @@ Voice dictation and prompt enhancement for [DeepSeek Harness](https://github.com
 
 ## What it does
 
-**Hold Alt to dictate.** Press and hold `Alt`, speak, release. The recording is transcribed on the Host and then cleaned up — typos, homophones, missing characters, punctuation and sentence breaks — and the result is inserted at the cursor. The cleanup is deliberately minimal: it never rewrites, expands, summarises or asks a question, and anything uncertain is left exactly as it came out. A dictated sentence that happens to *sound* like an instruction is treated as text to be copied, not as a request to follow.
+**Hold Ctrl to dictate.** Press and hold `Ctrl`, speak, release. The recording is transcribed on the Host and then cleaned up — typos, homophones, missing characters, punctuation and sentence breaks — and the result is inserted at the cursor. The cleanup is deliberately minimal: it never rewrites, expands, summarises or asks a question, and anything uncertain is left exactly as it came out. A dictated sentence that happens to *sound* like an instruction is treated as text to be copied, not as a request to follow.
 
 **✨ Enhance prompt.** The sparkle button at the left of the composer, immediately before the model selector, rewrites the current draft into a brief an assistant can act on without asking follow-up questions: it supplies the background and goal, splits the request into separately checkable task points, states acceptance per point, and fixes the scope, constraints and deliverable format. The result replaces the draft, with an Undo control to get the original back.
 
@@ -16,9 +16,9 @@ A status pill appears below the composer card while either control is working: e
 
 | Key / control | Behaviour |
 | --- | --- |
-| `Alt` (press and hold) | Start recording |
-| release `Alt` | Stop, transcribe, correct, insert |
-| `Alt` + any other key | Treated as a shortcut (`Alt+Tab`, IME chords); the capture is discarded |
+| `Ctrl` (press and hold) | Start recording |
+| release `Ctrl` | Stop, transcribe, correct, insert |
+| `Ctrl` + any other key | Treated as a shortcut (`Ctrl+C`, `Ctrl+V`…); the capture is discarded |
 | `Esc` while recording | Cancel |
 | ✨ button | Enhance the draft |
 | `R` (when not typing) | Restore the previous draft |

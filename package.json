@@ -1,7 +1,7 @@
 {
   "name": "dsh-voice-enhance",
   "version": "1.0.0",
-  "description": "Hold Alt to dictate, release to insert the cleaned-up transcript; a ✨ button at the left of the composer rewrites the draft into a clearer prompt.",
+  "description": "Hold Ctrl to dictate, release to insert the cleaned-up transcript; a ✨ button at the left of the composer rewrites the draft into a clearer prompt.",
   "type": "module",
   "license": "MIT",
   "repository": {
