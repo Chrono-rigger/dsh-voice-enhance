@@ -93,6 +93,7 @@
 			"enhance.busy": "正在增强提示词…",
 			"enhance.slow": "模型响应太慢，请稍后重试",
 			"enhance.done": "提示词已增强",
+		"enhance.unchanged": "模型认为草稿已经很清晰，没有做改动",
 			"enhance.failed": "增强失败：{message}",
 			"keys.title": "快捷键",
 			"keys.dictate": "语音输入（按住说话）",
@@ -146,6 +147,7 @@
 			"enhance.busy": "Enhancing the prompt…",
 			"enhance.slow": "The model took too long — try again",
 			"enhance.done": "Prompt enhanced",
+		"enhance.unchanged": "The draft already reads clearly — nothing was changed",
 			"enhance.failed": "Enhance failed: {message}",
 			"keys.title": "Shortcuts",
 			"keys.dictate": "Dictation (hold to talk)",
@@ -1126,6 +1128,12 @@
 					if (next.trim() === "") throw new Error("the model returned nothing");
 					const actions = this.actions;
 					if (actions === null) throw new Error("the composer is gone");
+					// A rewrite identical to the draft changes nothing visible; say so
+					// instead of claiming success over an untouched box.
+					if (next === text) {
+						store.set({ phase: "note", note: { key: "enhance.unchanged" }, error: null, undo: null });
+						return;
+					}
 					if (typeof actions.setDraft === "function") {
 						// Remember what was there before the rewrite, so the draft can
 						// be put back even after the pill has cleared.
