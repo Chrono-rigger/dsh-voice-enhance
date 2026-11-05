@@ -8,5 +8,5 @@ build/*
 node_modules/
 *.tgz
 .selftest.*
-__probe.js
-lib/__probe.js
+__probe*.js
+lib/__probe*.js
