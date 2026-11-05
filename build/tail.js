@@ -11,7 +11,17 @@
 			properties: {
 				text: { type: "string" },
 				mode: { type: "string" },
-				instruction: { type: "string" }
+				instruction: { type: "string" },
+				enhanceRoute: {
+					type: "object",
+					description: "an explicit enhancement model route picked on the plugin page, or null to follow the automatic chain.",
+					properties: {
+						provider: { type: "string" },
+						model: { type: "string" }
+					},
+					required: ["provider", "model"],
+					additionalProperties: false
+				}
 			},
 			required: ["text"],
 			additionalProperties: true
@@ -33,7 +43,11 @@
 							create: () => z.object({
 								text: z.string().readonly(),
 								mode: z.string().readonly().optional(),
-								instruction: z.string().readonly().optional()
+								instruction: z.string().readonly().optional(),
+								enhanceRoute: z.object({
+									provider: z.string().readonly(),
+									model: z.string().readonly()
+								}).readonly().nullable().optional()
 							}),
 							jsonSchema: REFINE_SCHEMA
 						},
@@ -43,7 +57,11 @@
 							create: () => z.strictObject({
 								text: z.string().readonly(),
 								mode: z.string().readonly().optional(),
-								instruction: z.string().readonly().optional()
+								instruction: z.string().readonly().optional(),
+								enhanceRoute: z.object({
+									provider: z.string().readonly(),
+									model: z.string().readonly()
+								}).readonly().nullable().optional()
 							}),
 							jsonSchema: { ...REFINE_SCHEMA, additionalProperties: false }
 						}
@@ -90,6 +108,11 @@
 			"keys.saved": "已保存",
 			"keys.moved": "回退草稿已改为 {chord}，避免和这个按键冲突",
 			"keys.guard": "裸键只在光标不在输入框时生效",
+			"route.title": "提示词增强模型",
+			"route.hint": "语音修正始终跟随当前会话模型，不受这里影响。",
+			"route.follow": "跟随当前模型（默认）",
+			"route.saving": "已选择 {label}",
+			"route.error": "模型列表加载失败",
 			"draft.restore": "回退草稿",
 			"draft.restoreHint": "把上一个草稿放回输入框（{chord}）",
 			"draft.restored": "已回退到上一个草稿",
@@ -138,6 +161,11 @@
 			"keys.saved": "Saved",
 			"keys.moved": "Restore draft moved to {chord} so the two do not fight",
 			"keys.guard": "A bare key only works while the focus is outside the composer",
+			"route.title": "Enhancement model",
+			"route.hint": "Dictation cleanup always follows the current session model; this choice only affects ✨ enhancement.",
+			"route.follow": "Follow the current model (default)",
+			"route.saving": "Using {label}",
+			"route.error": "The model list failed to load",
 			"draft.restore": "Restore draft",
 			"draft.restoreHint": "Put the previous draft back in the composer ({chord})",
 			"draft.restored": "Restored the previous draft",
@@ -178,9 +206,9 @@
 		const KEYS_STORAGE = "dsh-voice-enhance.keys";
 		const DEFAULT_KEYS = {
 			/** Push-to-talk. Held down, not tapped. A single modifier. */
-			dictate: "Ctrl",
+			dictate: "Alt",
 			/** Restore the previous draft. A chord, works while typing. */
-			restore: "Alt+."
+			restore: "Ctrl+."
 		};
 		/**
 		 * Chords the harness, the browser or the OS already own.
@@ -430,6 +458,91 @@
 			parts.push(key.length === 1 ? key.toUpperCase() : key);
 			const chord = parts.join("+");
 			return chord === "" ? null : chord;
+		}
+		//#endregion
+		//#region dsh-voice-enhance/lib/route.js
+		/**
+		 * The model route prompt enhancement runs on, chosen on the plugin page.
+		 *
+		 * Stored in localStorage like the shortcuts, and for the same reason: a
+		 * Host Config save rewrites the Loader entry and remounts the plugin,
+		 * which is far too heavy for "which model rewrites my draft". The value
+		 * is `null` (follow the composition's automatic chain — the default) or
+		 * a `{ provider, model }` pair picked from the model catalogue.
+		 */
+		const ROUTE_STORAGE = "dsh-voice-enhance.enhanceRoute";
+		function readRoute() {
+			try {
+				const raw = window.localStorage?.getItem(ROUTE_STORAGE);
+				if (raw === null || raw === undefined || raw === "") return null;
+				const parsed = JSON.parse(raw);
+				if (parsed === null || typeof parsed !== "object") return null;
+				if (typeof parsed.provider !== "string" || typeof parsed.model !== "string") return null;
+				if (parsed.provider === "" || parsed.model === "") return null;
+				return { provider: parsed.provider, model: parsed.model };
+			} catch {
+				return null;
+			}
+		}
+		function writeRoute(value) {
+			try {
+				if (value === null) window.localStorage?.removeItem(ROUTE_STORAGE);
+				else window.localStorage?.setItem(ROUTE_STORAGE, JSON.stringify(value));
+			} catch {
+				/* a locked-down storage just loses the preference */
+			}
+		}
+		/** The live enhance-route choice, shared by the caller and the config page. */
+		const routeConfig = {
+			current: readRoute(),
+			listeners: new Set(),
+			/** Set in registerUi; the picker reads the model catalogue through it. */
+			remoteOf: () => null,
+			get() {
+				return routeConfig.current;
+			},
+			set(value) {
+				routeConfig.current = value;
+				writeRoute(value);
+				for (const listener of [...routeConfig.listeners]) listener();
+			},
+			subscribe(listener) {
+				routeConfig.listeners.add(listener);
+				return () => routeConfig.listeners.delete(listener);
+			}
+		};
+		function useRouteConfig() {
+			return React.useSyncExternalStore(routeConfig.subscribe, () => routeConfig.current, () => routeConfig.current);
+		}
+		/**
+		 * One `{ key, providerName, modelName, available }` entry per catalogued
+		 * model, flattening the provider-grouped catalogue the way the Subagent
+		 * settings card does. Groups that failed to load are skipped; the pair a
+		 * stale stored route names is appended as unavailable so it still shows.
+		 */
+		function routeOptions(groups, picked) {
+			const options = (groups ?? []).flatMap((group) => (group?.models ?? []).map((model) => ({
+				key: `${group.id}::${model.id}`,
+				provider: group.id,
+				model: model.id,
+				providerName: group.name ?? group.id,
+				modelName: model.name ?? model.id,
+				available: true
+			})));
+			if (picked !== null && picked !== undefined) {
+				const key = `${picked.provider}::${picked.model}`;
+				if (!options.some((option) => option.key === key)) {
+					options.push({
+						key,
+						provider: picked.provider,
+						model: picked.model,
+						providerName: picked.provider,
+						modelName: picked.model,
+						available: false
+					});
+				}
+			}
+			return options;
 		}
 		//#endregion
 		//#region dsh-voice-enhance/lib/store.js
@@ -1005,7 +1118,9 @@
 				this.busy = true;
 				store.set({ phase: "enhancing", note: { key: "enhance.busy" }, error: null, pending: "", undo: null });
 				try {
-					const result = await withTimeout(remote.refine({ text, mode: "enhance" }), ENHANCE_MS, "enhanceTimeout");
+					// The picked enhancement route travels with the request; null
+					// means "follow the composition's automatic chain" (default).
+					const result = await withTimeout(remote.refine({ text, mode: "enhance", enhanceRoute: routeConfig.get() }), ENHANCE_MS, "enhanceTimeout");
 					if (result?.ok !== true) throw new Error(result?.error?.message ?? "enhance failed");
 					const next = typeof result.value?.text === "string" ? result.value.text : "";
 					if (next.trim() === "") throw new Error("the model returned nothing");
@@ -1419,6 +1534,10 @@
 .dsh-ve-settings-foot{margin-top:2px}
 .dsh-ve-reset{padding:3px 10px;border:0;border-radius:6px;background:var(--dsw-alias-interactive-bg-hover-solid);color:var(--dsw-alias-label-secondary);font:inherit;cursor:pointer}
 .dsh-ve-reset:hover{color:var(--dsw-alias-label-primary)}
+.dsh-ve-route{display:flex;flex-direction:column;gap:8px;padding:12px 0 4px;font-size:13px;color:var(--dsw-alias-label-primary);border-top:1px solid var(--dsw-alias-border-l1);margin-top:4px}
+.dsh-ve-routeselect{max-width:420px;padding:4px 10px;border:1px solid var(--dsw-alias-border-l1);border-radius:6px;background:transparent;color:var(--dsw-alias-label-primary);font:inherit;cursor:pointer}
+.dsh-ve-routeselect:hover{border-color:var(--dsw-alias-interactive-bg-hover-solid)}
+.dsh-ve-routeselect:focus-visible{outline:2px solid var(--dsw-alias-state-business-primary);outline-offset:1px}
 `;
 		//#endregion
 		//#region dsh-voice-enhance/lib/SettingsCard.js
@@ -1512,7 +1631,99 @@
 							setProblem(null);
 							setCapturing(null);
 						}
-					}, t("keys.reset"))));
+					}, t("keys.reset"))),
+				h(RouteCard, { t }));
+		}
+		//#endregion
+		//#region dsh-voice-enhance/lib/RouteCard.js
+		/**
+		 * The enhancement-model picker, rendered under the shortcut editor on the
+		 * same bundle page.
+		 *
+		 * The model list comes from the Host's own model catalogue through the
+		 * already-mounted `remote.session` remote (the same read the model
+		 * selector in the composer uses), so it shows exactly what is routable
+		 * right now — providers without keys are simply absent, and a stored
+		 * choice that has since become unroutable still renders (greyed, with an
+		 * "unavailable" suffix) instead of vanishing. Re-read when the Host
+		 * advertises adapter changes, like the Subagent settings card does.
+		 */
+		function RouteCard(props) {
+			const t = typeof props.t === "function" ? props.t : (key) => key;
+			const picked = useRouteConfig();
+			const [groups, setGroups] = React.useState(null);
+			const [failed, setFailed] = React.useState(false);
+			const [detail, setDetail] = React.useState("");
+			React.useEffect(() => {
+				let disposed = false;
+				const load = async () => {
+					try {
+						const session = typeof routeConfig.remoteOf === "function" ? routeConfig.remoteOf() : null;
+						const direct = session !== null && typeof session.modelCatalog === "function" ? session : null;
+						if (direct === null) {
+							if (!disposed) {
+								setFailed(true);
+								setDetail("remote.session.modelCatalog unavailable");
+							}
+							return;
+						}
+						const response = await direct.modelCatalog();
+						if (disposed) return;
+						if (response?.ok === true) {
+							setGroups(response.value?.groups ?? []);
+							setFailed(false);
+							setDetail("");
+						} else {
+							setFailed(true);
+							setDetail(JSON.stringify(response?.error ?? response ?? "empty envelope").slice(0, 160));
+						}
+					} catch (error) {
+						if (!disposed) {
+							setFailed(true);
+							setDetail(String(error?.message ?? error).slice(0, 160));
+						}
+					}
+				};
+				void load();
+				const off = typeof routeConfig.onAdapterChange === "function"
+					? routeConfig.onAdapterChange(() => void load())
+					: null;
+				return () => {
+					disposed = true;
+					if (typeof off === "function") off();
+				};
+			}, []);
+			const options = routeOptions(groups, picked);
+			const selected = picked === null ? "" : `${picked.provider}::${picked.model}`;
+			return h("div", { className: "dsh-ve-route" },
+				h("div", { className: "dsh-ve-settings-head" }, t("route.title")),
+				h("div", { className: "dsh-ve-keyhint" }, t("route.hint")),
+				failed && groups === null
+					? h("div", { className: "dsh-ve-keyerror", role: "alert" },
+						t("route.error"),
+						detail ? h("div", { style: "font-family:monospace;font-size:11px;white-space:pre-wrap;margin-top:4px;word-break:break-all;" }, detail) : null)
+					: h("select", {
+						className: "dsh-ve-routeselect",
+						value: selected,
+						onChange: (event) => {
+							const value = event.target.value;
+							if (value === "") {
+								routeConfig.set(null);
+								return;
+							}
+							const option = options.find((candidate) => candidate.key === value);
+							if (option === undefined || option.available !== true) return;
+							routeConfig.set({ provider: option.provider, model: option.model });
+						}
+					},
+						h("option", { value: "" }, t("route.follow")),
+						options.map((option) => h("option", {
+							key: option.key,
+							value: option.key,
+							disabled: option.available !== true
+						}, option.available
+							? `${option.providerName} · ${option.modelName}`
+							: `${option.providerName} · ${option.modelName}（不可用）`))));
 		}
 		//#endregion
 		//#region dsh-voice-enhance/lib/mount.js
@@ -1530,6 +1741,24 @@
 				}
 				try {
 					return typeof ctx.get === "function" ? ctx.get("remote.speech") ?? null : null;
+				} catch {
+					return null;
+				}
+			};
+			// The bundle-page model picker reads the catalogue through the same
+			// `remote.session` namespace the composer's model selector uses.
+			routeConfig.remoteOf = () => {
+				try {
+					const session = ctx.remote?.session;
+					if (session !== undefined && session !== null) return session;
+				} catch {
+					/* fall through to null below */
+				}
+				return null;
+			};
+			routeConfig.onAdapterChange = (handler) => {
+				try {
+					return ctx.remote?.$on?.("llm/adapters-updated", handler) ?? null;
 				} catch {
 					return null;
 				}
@@ -1570,7 +1799,7 @@
 		}
 		async function mountVoiceEnhance(ctx, contribution) {
 			const disposeRemote = await ctx.remote.$mount(contribution);
-			const ui = ctx.inject(["remote.promptTools", "slots", "locale"], registerUi);
+			const ui = ctx.inject(["remote.promptTools", "remote.session", "slots", "locale"], registerUi);
 			try {
 				await ui;
 			} catch (error) {

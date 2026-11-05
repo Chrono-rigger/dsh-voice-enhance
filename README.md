@@ -6,7 +6,7 @@ Voice dictation and prompt enhancement for [DeepSeek Harness](https://github.com
 
 ## What it does
 
-**Hold Ctrl to dictate.** Press and hold `Ctrl`, speak, release. The recording is transcribed on the Host and then cleaned up — typos, homophones, missing characters, punctuation and sentence breaks — and the result is inserted at the cursor. The cleanup is deliberately minimal: it never rewrites, expands, summarises or asks a question, and anything uncertain is left exactly as it came out. A dictated sentence that happens to *sound* like an instruction is treated as text to be copied, not as a request to follow.
+**Hold Alt to dictate.** Press and hold `Alt`, speak, release. The recording is transcribed on the Host and then cleaned up — typos, homophones, missing characters, punctuation and sentence breaks — and the result is inserted at the cursor. The cleanup is deliberately minimal: it never rewrites, expands, summarises or asks a question, and anything uncertain is left exactly as it came out. A dictated sentence that happens to *sound* like an instruction is treated as text to be copied, not as a request to follow.
 
 **✨ Enhance prompt.** The sparkle button at the left of the composer, immediately before the model selector, rewrites the current draft into a brief an assistant can act on without asking follow-up questions: it supplies the background and goal, splits the request into separately checkable task points, states acceptance per point, and fixes the scope, constraints and deliverable format. The result replaces the draft, with an Undo control to get the original back.
 
@@ -16,17 +16,17 @@ A status pill appears below the composer card while either control is working: e
 
 | Key / control | Behaviour |
 | --- | --- |
-| `Ctrl` (press and hold) | Start recording |
-| release `Ctrl` | Stop, transcribe, correct, insert |
-| `Ctrl` + any other key | Treated as a shortcut (`Ctrl+C`, `Ctrl+V`…); the capture is discarded |
+| `Alt` (press and hold) | Start recording |
+| release `Alt` | Stop, transcribe, correct, insert |
+| `Alt` + any other key | Treated as a shortcut (`Alt+Tab` is caught by the OS); the capture is discarded |
 | `Esc` while recording | Cancel |
 | ✨ button | Enhance the draft |
-| `R` (when not typing) | Restore the previous draft |
+| `Ctrl+.` | Restore the previous draft |
 
 ## Requirements
 
 - The recording is transcribed by the Harness **Voice Input** plugin (`dsh-experimental-voice-input-bundle`), which must be enabled and its SenseVoice model prepared. Without it the plugin reports that the speech service is unavailable.
-- Correction and prompt enhancement run on the Host through the `llm` service, using the composition's **default model route**. No API key is configured or read by this plugin.
+- Correction and prompt enhancement run on the Host through the `llm` service. Correction always uses the composition's **default model route**; prompt enhancement follows the **model picked on the plugin page** (default: the current route, freely selectable from every installed model). No API key is configured or read by this plugin.
 - The browser needs microphone access (HTTPS or `127.0.0.1`, plus OS permission).
 
 ## Install
@@ -39,7 +39,8 @@ Or from the Web UI: **Settings → Plugins**, then install the bundle by package
 
 ## Notes
 
-- Nothing is persisted except one browser-local preference: the "send on release" switch (`localStorage` key `dsh-voice-enhance.autoSend`). Recordings are discarded after transcription; no audio is written to disk.
+- Two Remote calls cross the wire, both of them one-shot text rewrites: `promptTools/refine` with `mode: "correct"` for a transcript, `mode: "enhance"` for a draft; the enhance request may carry an `enhanceRoute` picked on the plugin page.
+- Nothing is persisted except three browser-local preferences: the "send on release" switch (`dsh-voice-enhance.autoSend`), the custom keys (`dsh-voice-enhance.keys`) and the enhancement model route (`dsh-voice-enhance.enhanceRoute`). Recordings are discarded after transcription; no audio is written to disk.
 - The audio pipeline is bounded end to end: microphone permission, recorder flush, decoding, resampling and transcription each have a timeout, so a wedged browser API surfaces as an error message rather than an endless "transcribing" state.
 - Two Remote calls cross the wire, both of them one-shot text rewrites: `promptTools/refine` with `mode: "correct"` for a transcript, `mode: "enhance"` for a draft.
 - The cleanup is checked in code, not only asked for in the prompt: an answer that replies to the text, asks a question, expands or shortens it is rejected, one terser retry is made, and failing that the transcript is inserted unchanged. A transcript with a typo still says what was said; a rewritten one does not.

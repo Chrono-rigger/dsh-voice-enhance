@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Voice Input & Prompt Enhance",
-    "description": "Hold Ctrl to dictate and release to insert the cleaned-up transcript (the key is rebindable on the plugin page); the ✨ button at the left of the composer rewrites the current draft into a clearer prompt."
+    "description": "Hold Alt to dictate and release to insert the cleaned-up transcript (the default key is Alt, rebindable on the plugin page); the ✨ button at the left of the composer rewrites the current draft into a clearer prompt."
   },
   "enhance": {
     "title": "Enhance prompt",
